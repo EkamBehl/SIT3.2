@@ -1,0 +1,55 @@
+SYSTEM_THREAD(ENABLED);
+
+
+
+SerialLogHandler logHandler;
+
+
+
+const pin_t LED_PIN=A5;
+const pin_t PHOTORES_PIN=A0;
+
+
+int analogValue;
+int ledToggle(String command);
+
+
+void setup() {
+    pinMode(LED_PIN,OUTPUT);
+    digitalWrite(LED_PIN,HIGH);
+    
+    Particle.variable("analogValue",analogValue);
+    
+    Particle.function("LED_PIN",ledToggle);
+    Particle.variable("analog",analogValue);
+}
+
+void loop() {
+    
+    analogValue=analogRead(PHOTORES_PIN);
+    
+    Log.info("analogValue=%d",analogValue);
+    if(analogValue<150){
+        ledToggle("off");
+        Particle.publish("SunLight","No_Sun",PUBLIC);
+        
+    }
+    else{
+        ledToggle("on");
+        Particle.publish("SunLight","SUN",PUBLIC);
+        
+        delay(100ms);
+    }
+
+}
+int ledToggle(String Command){
+    if(Command.equals("on")){
+        digitalWrite(LED_PIN,HIGH);
+        return 1;
+    }else if(Command.equals("off")){
+        digitalWrite(LED_PIN,LOW);
+        return 0;
+    }else{
+        return -1;
+    }
+}
